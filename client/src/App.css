@@ -1,0 +1,140 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.App {
+  height: 100vh;
+  width: 100vw;
+  overflow: auto;
+  position: relative;
+}
+
+.image {
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.image img {
+  transition: transform 0.5s ease-in-out;
+}
+
+.image:hover img {
+  transform: scale(1.1);
+}
+
+.button {
+  @apply bg-blue-500 hover:bg-blue-700 rounded ease-linear duration-200 text-white text-sm py-2 px-3 dark:bg-white dark:text-black
+}
+
+.loader {
+  width: 100px;
+  height: 100px;
+  border: 2px solid blue;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  }
+
+  @keyframes rotation {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+  } 
+
+.popup-container {
+  @apply fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center
+}
+
+.popup {
+  @apply bg-white p-8 rounded-lg shadow-lg opacity-100 w-[300px] md:w-[500px] dark:bg-gray-800 dark:border-white dark:border-solid dark:border-2
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid lightgrey;
+}
+
+.label {
+  @apply block mb-1 text-sm font-medium text-gray-900 dark:text-white
+}
+
+.input-text {
+  @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg outline-blue-400 focus:ring-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
+}
+
+.submit-btn {
+  @apply w-full text-center bg-blue-500 mt-3 mb-3 py-1 rounded-lg text-white cursor-pointer hover:bg-blue-700 ease-linear duration-200 dark:bg-white dark:text-black
+}
+
+.input-file {
+  @apply block w-full border border-gray-200 shadow-sm rounded-lg text-sm focus:z-10 focus:border-blue-500 focus:ring-blue-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-900 dark:border-gray-700 dark:text-gray-400 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600 file:bg-blue-500 file:text-white file:border-0 file:me-4 file:py-2 file:px-4 dark:file:bg-white dark:file:text-black
+}
+
+.selectbox {
+  @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 outline-blue-500
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: relative;
+  animation: rotate 1s linear infinite;
+  margin: auto;
+}
+
+.loader::before {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0px;
+  border-radius: 50%;
+  border: 2px solid #FFF;
+  animation: prixClipFix 2s linear infinite;
+  @apply dark:border-black
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg)
+  }
+}
+
+@keyframes prixClipFix {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0)
+  }
+
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0)
+  }
+
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%)
+  }
+
+  75% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%)
+  }
+
+  100% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0)
+  }
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

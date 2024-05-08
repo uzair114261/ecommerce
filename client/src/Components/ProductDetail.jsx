@@ -1,44 +1,30 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { memo } from 'react';
 import { Cart } from 'react-bootstrap-icons';
-import { CartContext } from './Cart';
+import { fetchProductInfo } from '../features/ProductsInfo/ProductInfoSlice';
+import { useDispatch, useSelector } from 'react-redux'
+import { incrementCounter,decrementCounter,hideAlert } from '../features/ProductsInfo/ProductInfoSlice';
+
 
 function ProductDetail() {
+    const dispatch = useDispatch()
+    const {product, loading, error, counter, alert} = useSelector(state => state.productInfo)
     const { slug } = useParams();
-    const [product, setProduct] = useState(null);
-    const [counter, setCounter] = useState(1);
     const [outOfStock, setOutOfStock] = useState(false);
-    const [alert, showAlert] = useState(false)
-    const { addToCart } = useContext(CartContext)
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}product/api/?slug=${slug}`);
-                const data = await response.json();
-                setProduct(data);
-            } catch (err) {
-                console.error('Error fetching data:', err);
-                setProduct(null);
-            }
-        };
-        fetchData();
+        dispatch(fetchProductInfo(slug))
     }, [slug]);
 
-    const handleIncrement = () => {
-        if (counter < product?.stock_quantity) {
-            setCounter(counter + 1);
-            setOutOfStock(false);
-        } else {
-            showAlert(true);
-            setOutOfStock(true);
-        }
-    };
+    const handleIncrement = useCallback(()=>{
+        dispatch(incrementCounter());
+    },[dispatch])
 
-    useEffect(() => {
-        setOutOfStock(counter >= product?.stock_quantity);
-    }, [counter, product?.stock_quantity]);
-
-
+    const handleDecrement = () => {
+        dispatch(decrementCounter())
+    }
+    console.log('Rendered')
 
     return (
         <div className='container mx-auto pt-12'>
@@ -60,12 +46,12 @@ function ProductDetail() {
                             <div className="add-to-cart flex items-center mt-4">
                                 <div className="quantity">
                                     <div className="flex mr-4 dark:text-white">
-                                        <button onClick={() => counter > 1 && setCounter(counter - 1)} className='border px-2 font-bold'>-</button>
+                                        <button onClick={handleDecrement} className='border px-2 font-bold'>-</button>
                                         <button className='border px-5'>{counter}</button>
                                         <button onClick={handleIncrement} className='border px-2 font-bold'>+</button>
                                     </div>
                                 </div>
-                                <button disabled={outOfStock} onClick={()=> addToCart(product, counter)} className={`button flex items-center ${outOfStock && 'disabled:bg-gray-300 cursor-not-allowed'}`}>
+                                <button   className='button flex items-center'>
                                     <Cart className='mr-2' /> Add to Cart
                                 </button>
                             </div>
@@ -87,7 +73,7 @@ function ProductDetail() {
 
                                 <button
                                     className="px-4 py-2 bg-blue-500 ease-linear duration-200 text-white rounded hover:bg-blue-500 dark:bg-white dark:text-black"
-                                    onClick={() => showAlert(false)}
+                                    onClick={() => dispatch(hideAlert())}
                                 >
                                     Ok
                                 </button>
@@ -100,4 +86,4 @@ function ProductDetail() {
     );
 }
 
-export default ProductDetail;
+export default (ProductDetail);

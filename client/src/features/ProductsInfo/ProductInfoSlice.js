@@ -39,6 +39,9 @@ export const ProductInfoSlice = createSlice({
         state.counter -= 1;
       }
     },
+    resetCounter: (state, action) => {
+      state.counter = action.payload
+    },
     setOutOfStock: (state, action) => {
       state.outOfStock = action.payload;
     },
@@ -67,6 +70,7 @@ export const ProductInfoSlice = createSlice({
 export const {
   incrementCounter,
   decrementCounter,
+  resetCounter,
   setOutOfStock,
   showAlert,
   hideAlert,

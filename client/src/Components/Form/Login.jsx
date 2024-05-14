@@ -69,8 +69,8 @@ const Login = ({ setToggleForm}) => {
                         {errors.password && <span className='text-blue-800 text-sm dark:text-white'>{errors.password.message}</span>}
                     </div>
                     <div>
-                        <button type='submiy' className="submit-btn">
-                            {loading ? (<div className='loader'></div>): (<div>Login</div>)}
+                        <button type='submiy' className="submit-btn h-[40px]">
+                            {loading ? (<div className='spinner'></div>): (<div>Login</div>)}
                         </button>
                         <div className="flex justify-end items-center">
                             <h2 className='text-sm cursor-pointer dark:text-white' onClick={() => setToggleForm(false)}>Create an account</h2>

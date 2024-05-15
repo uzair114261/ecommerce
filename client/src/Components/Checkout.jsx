@@ -1,14 +1,14 @@
-import React, { useContext } from 'react'
+import React from 'react'
 import Step1 from './Multistep/Step1'
 import Step2 from './Multistep/Step2'
 import Step3 from './Multistep/Step3'
 import Step4 from './Multistep/Step4'
 import { MultiStepContext } from './Context/Multistep'
 import { Check2 } from 'react-bootstrap-icons'
+import { useSelector } from 'react-redux'
 
 const Checkout = () => {
-    const MultiStep = useContext(MultiStepContext)
-    const { step } = MultiStep
+    const step = useSelector(state => state.multistep.step)
     return (
         <div className='bg-blue-100 dark:bg-gray-700 flex items-center justify-center py-5 px-2'>
             <div className="bg-white dark:bg-gray-800 rounded p-2 sm:p-5 w-full sm:w-[1000px] max-w-[1000px] flex flex-col sm:flex-row">

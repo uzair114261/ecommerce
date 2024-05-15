@@ -4,6 +4,7 @@ import productInfoReducer from '../features/ProductsInfo/ProductInfoSlice';
 import CartReducer from '../features/cart/CartSlice';
 import registerReducer from '../features/auth/registerSlice';
 import loginReducer from '../features/auth/loginSlice'
+import multiStepReducer from '../features/multistep/multistepSlice'
 
 export const store = configureStore({
     reducer:{
@@ -11,6 +12,7 @@ export const store = configureStore({
         productInfo: productInfoReducer,
         cart: CartReducer,
         register: registerReducer,
-        login: loginReducer
+        login: loginReducer,
+        multistep: multiStepReducer
     }
 })

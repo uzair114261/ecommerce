@@ -1,16 +1,33 @@
-import React, { useContext, useState } from 'react'
-import { MultiStepContext } from '../Context/Multistep'
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useForm } from 'react-hook-form'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { setStep, setPaymentData } from '../../features/multistep/multistepSlice'
+
 const Step2 = () => {
-  const MultiStep = useContext(MultiStepContext)
-  const { nextHandler, prevHandler, paymentData, setPaymentData } = MultiStep
-  const [alert, showAlert] = useState(false)
-  const handleNext = () => {
-    if(paymentData.address === ''){
-      showAlert(true)
-    }else{
-      nextHandler()
-    }
+  const dispatch = useDispatch()
+  const paymentData = useSelector(state => state.multistep.paymentData)
+  const schema = yup.object().shape({
+    address: yup.string().required('Address is required')
+  })
+  const {register, handleSubmit, formState: {errors}} = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: paymentData
+  })
+  const prevHandler = () => {
+    dispatch(setStep(1))
   }
+  const nextHandler = (data) => {
+    dispatch(
+      setPaymentData({
+        address: data.address
+      })
+    )
+    dispatch(setStep(3))
+  }
+  const [alert, showAlert] = useState(false)
+  
   return (
     <div>
       <h1 className="text-2xl font-semibold sm:text-3xl sm:font-bold dark:text-white">Shipping Infromation</h1>
@@ -18,34 +35,15 @@ const Step2 = () => {
       <div className='mt-3'>
         <div className='mb-3'>
           <label htmlFor="" className='label'>Address</label>
-          <textarea value={paymentData.address} name='addreess' onChange={(e) => setPaymentData({ ...paymentData, address: e.target.value })} id="" cols="50" rows="4" className='input-text w-full resize-none'></textarea>
+          <textarea  name='addreess' {...register('address')} id="" cols="50" rows="4" className='input-text w-full resize-none'></textarea>
+          {errors.address && <span className='errors'>{errors.address.message}</span>}
         </div>
 
       </div>
       <div className="flex justify-between items-center sm:h-[100px]">
         <button onClick={prevHandler} className='bg-blue-500 dark:text-black dark:bg-white rounded py-1 px-3 text-white'>Back</button>
-        <button onClick={handleNext} className='bg-blue-500 dark:text-black dark:bg-white rounded py-1 px-3 text-white'>Next</button>
+        <button onClick={handleSubmit(nextHandler)}  className='bg-blue-500 dark:text-black dark:bg-white rounded py-1 px-3 text-white'>Next</button>
       </div>
-
-      {
-        alert && (
-          <div className="popup-container">
-            <div className="popup">
-              <h2 className="text-lg font-bold mb-4 dark:text-white">Message</h2>
-              <p className="mb-4 dark:text-white">Please fill all the fields</p>
-              <div className="flex justify-end">
-
-                <button
-                  className="px-4 py-2 bg-blue-500 ease-linear duration-200 text-white rounded hover:bg-blue-500 dark:bg-white dark:text-black"
-                  onClick={() => showAlert(false)}
-                >
-                  Ok
-                </button>
-              </div>
-            </div>
-          </div>
-        )
-      }
     </div>
   )
 }

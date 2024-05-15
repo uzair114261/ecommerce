@@ -1,77 +1,105 @@
-import React, { useContext, useState } from 'react'
-import { MultiStepContext } from '../Context/Multistep'
-import InputMask from 'react-input-mask'
-const Step1 = () => {
-  const MultiStep = useContext(MultiStepContext);
-  const { nextHandler, paymentData, setPaymentData, errors, setErrors, validateEmail } = MultiStep;
-  const [alert, showAlert] = useState(false)
+import React, { useContext, useState } from "react";
+import { MultiStepContext } from "../Context/Multistep";
+import InputMask from "react-input-mask";
+import { useSelector, useDispatch } from "react-redux";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import {
+  setPaymentData,
+  setStep,
+} from "../../features/multistep/multistepSlice";
 
-  const EmailHandler = (e) => {
-    const newEmail = e.target.value;
-    const emailRegex = /^[^\s'"@]+@[^\s'"@]+\.[^\s'"@]+$/;
-    if (!emailRegex.test(newEmail)) {
-      setErrors({ ...errors, email: 'Please Enter a valid email address' })
-    } else {
-      setErrors({ ...errors, email: '' })
-    }
-    setPaymentData({
-      ...paymentData,
-      email: newEmail
-    })
-  };
-  const handleNext = () => {
-    if (paymentData.name === '' || paymentData.email === '' || paymentData.phone === '') {
-      showAlert(true)
-    } else {
-      if (validateEmail(paymentData.email)) {
-        nextHandler();
-      }
-    }
+const Step1 = () => {
+  const dispatch = useDispatch();
+  const paymentData = useSelector((state) => state.multistep.paymentData);
+  const schema = yup.object().shape({
+    email: yup.string().email("Invalid Email").required("Email is required"),
+    name: yup.string().required("Please enter the name"),
+    phone: yup.string().required("Please enter the phone number"),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: paymentData
+  });
+
+  const handleNext = (data) => {
+    dispatch(
+      setPaymentData({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+      })
+    )
+    dispatch(setStep(2))
   };
   return (
     <div>
-      <h1 className="text-2xl font-semibold sm:text-3xl sm:font-bold dark:text-white">Your Information</h1>
-      <p className='text-sm dark:text-white'>Please provide your name, email address and phone number.</p>
-      <div className='sm:w-[350px] mt-3'>
-        <div className='mb-3'>
-          <label htmlFor="" className='label'>Name</label>
-          <input type="text" name='name' value={paymentData.name} onChange={(e) => setPaymentData({ ...paymentData, name: e.target.value })} className='input-text' />
-
+      <h1 className="text-2xl font-semibold sm:text-3xl sm:font-bold dark:text-white">
+        Your Information
+      </h1>
+      <p className="text-sm dark:text-white">
+        Please provide your name, email address and phone number.
+      </p>
+      <div className="sm:w-[350px] mt-3">
+        <div className="mb-3">
+          <label htmlFor="" className="label">
+            Name
+          </label>
+          <input
+            type="text"
+            {...register("name")}
+            name="name"
+            className="input-text"
+          />
+          {errors.name && <span className="error">{errors.name.message}</span>}
         </div>
-        <div className='mb-3'>
-          <label htmlFor="" className='label'>Email</label>
-          <input type="email" name='email' value={paymentData.email} onChange={EmailHandler} className='input-text' />
-          {errors.email && <span className='text-red-600'>{errors.email}</span>}
+        <div className="mb-3">
+          <label htmlFor="" className="label">
+            Email
+          </label>
+          <input
+            type="email"
+            {...register("email")}
+            name="email"
+            className="input-text"
+          />
+          {errors.email && (
+            <span className="error">{errors.email.message}</span>
+          )}
         </div>
-        <div className='mb-3'>
-          <label htmlFor="" className='label'>Phone Number</label>
-          <InputMask name='phone' value={paymentData.phone} onChange={(e) => setPaymentData({ ...paymentData, phone: e.target.value })} className='input-text' mask="0399-9999999" maskChar="_" />
+        <div className="mb-3">
+          <label htmlFor="" className="label">
+            Phone Number
+          </label>
+          <InputMask
+            name="phone"
+            {...register("phone")}
+            className="input-text"
+            mask="0399-9999999"
+            maskChar="_"
+          />
+          {errors.phone && (
+            <span className="error">{errors.phone.message}</span>
+          )}
         </div>
-        </div>
-        <div className="flex justify-end items-center sm:h-[100px]">
-          <button type='button' onClick={handleNext} className='bg-blue-500 dark:text-black dark:bg-white rounded py-1 px-3 text-white'>Next</button>
-        </div>
-        {
-          alert && (
-            <div className="popup-container">
-              <div className="popup">
-                <h2 className="text-lg font-bold mb-4 dark:text-white">Message</h2>
-                <p className="mb-4 dark:text-white">Please fill all the fields</p>
-                <div className="flex justify-end">
-
-                  <button
-                    className="px-4 py-2 bg-blue-500 ease-linear duration-200 text-white rounded hover:bg-blue-500 dark:bg-white dark:text-black"
-                    onClick={() => showAlert(false)}
-                  >
-                    Ok
-                  </button>
-                </div>
-              </div>
-            </div>
-          )
-        }
       </div>
-  )
-}
+      <div className="flex justify-end items-center sm:h-[100px]">
+        <button
+          type="button"
+          onClick={handleSubmit(handleNext)}
+          className="bg-blue-500 dark:text-black dark:bg-white rounded py-1 px-3 text-white"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
 
-export default Step1
+export default Step1;

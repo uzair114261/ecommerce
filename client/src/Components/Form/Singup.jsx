@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InputMask from "react-input-mask";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -10,7 +10,6 @@ import { createUser } from "../../features/auth/registerSlice";
 const Singup = ({ setToggleForm }) => {
   const dispatch = useDispatch();
   const { error, loading, response } = useSelector((state) => state.register);
-    console.log(response.ok)
   const { notifySuccess, notifyError } = useToast();
   const schema = yup.object().shape({
     email: yup.string().email("Invalid email").required("Email is required"),
@@ -35,29 +34,32 @@ const Singup = ({ setToggleForm }) => {
       formData.append("password", data.password);
       formData.append("phone_number", data.phoneNumber);
       formData.append("user_image", data.image[0]);
-      
-      // Dispatch createUser and wait for it to complete
-      const action = await dispatch(createUser(formData));
-      
-      // Handle success case
-      notifySuccess("Account has been created successfully");
-      setTimeout(() => {
-        setToggleForm(true);
-      }, 2000);
-    } catch (error) {
-      // Handle error case
-      console.log("error in posting data", error.message);
-      const errorMessage = error.payload ? error.payload : 'Failed to create user';
-      console.log(errorMessage);
-      if (error.email) {
-        const errorData = error.email[0];
-        notifyError(errorData);
-      } else if (error.phone_number) {
-        const errorData = error.phone_number[0];
-        notifyError(errorData);
+
+      const resultAction = await dispatch(createUser(formData));
+      if (createUser.fulfilled.match(resultAction)) {
+        const responseData = resultAction.payload;
+        if (responseData.ok) {
+          notifySuccess("Account has been created Successfully");
+          setTimeout(() => {
+            setToggleForm(true)
+          }, 2000);
+        }
+      } else if (createUser.rejected.match(resultAction)) {
+        const responseData = resultAction.payload;
+        console.log(responseData);
+        if (responseData) {
+          if (responseData.email) {
+            notifyError(responseData.email[0]);
+          } else if (responseData.phone_number) {
+            notifyError(responseData.phone_number[0]);
+          }
+        }
       }
+    } catch (error) {
+      console.log("error in posting data", error.message);
     }
   };
+
   return (
     <div>
       <div className="flex flex-col gap-2 min-w-[320px] max-w-[500px] md:w-[500px] bg-white p-5 shadow-lg shadow-gray-300 rounded-lg dark:bg-gray-800 dark:shadow-none">

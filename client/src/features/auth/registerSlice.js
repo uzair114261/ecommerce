@@ -6,50 +6,52 @@ const initialState = {
   response: {}
 };
 
-
 export const createUser = createAsyncThunk(
   "register/createUser",
-  async (userData, { rejectWithValue }) => {
+  async (userData, thunk) => {
     try{
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}account/users/api/create-customer/`, {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}account/users/api/create-customer/`,{
             method: 'POST',
             body: userData
-        });
+        })
+
         if(!response.ok){
             const errorData = await response.json()
-            return rejectWithValue(errorData)
-        }
-        if(response.ok){
-            return response
-        }
+            return thunk.rejectWithValue(errorData)
+            }
+            if(response.ok){
+                return response
+            }
         const responseData = await response.json()
         return responseData
-    }catch(err){
-        return rejectWithValue({error: err.message})
+    }catch(error){
+        console.log('error is', thunk.rejectWithValue(error))
     }
   }
 );
 
 const registerSlice = createSlice({
-    name: 'register',
-    initialState,
-    reducers:{},
-    extraReducers: (builder) => {
-        builder
-        .addCase(createUser.pending, (state)=> {
-            state.loading = true;
-            state.error = null;
-        })
-        .addCase(createUser.fulfilled, (state, action) => {
-            state.loading = false;
-            state.error = null;
-            state.response = action.payload;
-        })
-        .addCase(createUser.rejected, (state, action) => {
-            state.loading = false;
-            state.error = action.payload ? action.payload : 'Failed to create user';
-        })
-    }
-})
+  name: 'register',
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(createUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.response = action.payload
+      })
+      .addCase(createUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ? action.payload : 'Failed to create user';
+      })
+      
+      
+  }
+});
 
 export default registerSlice.reducer;

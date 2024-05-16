@@ -36,9 +36,9 @@ const Checkout = () => {
                             </div>
                         </div>
                         <div className="step flex flex-col sm:flex-row gap-1 sm:gap-5 items-center my-10">
-                            <div className={`h-[30px] w-[30px] text-sm sm:text-lg border-2  border-white border-solid text-white flex items-center justify-center rounded-[50%] ${step >= 4 ? 'bg-white' : ''}`}>4</div>
+                            <div className={`h-[30px] w-[30px] text-sm sm:text-lg border-2  border-white border-solid text-white flex items-center justify-center rounded-[50%] ${step >= 4 ? 'bg-white' : ''}`}>{step >= 4 ? <Check2 color='#333' /> : 4}</div>
                             <div>
-                                <h1 className='hidden sm:block leading-5 text-white'>Step 1</h1>
+                                <h1 className='hidden sm:block leading-5 text-white'>Step 4</h1>
                                 <p className='hidden sm:block leading-5 text-sm sm:text-normal text-white'>Confirmation</p>
                             </div>
                         </div>

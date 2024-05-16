@@ -3,23 +3,28 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   setStep,
   setPaymentData,
+  setSuccess,
 } from "../../features/multistep/multistepSlice";
 import ReactInputMask from "react-input-mask";
 import { getTotalPrice, clearCart } from "../../features/cart/CartSlice";
+import {
+  submitCODPayment,
+  CredictCardTransaction,
+} from "../../features/multistep/multistepSlice";
 
 const Step3 = () => {
-  const totalPrice = useSelector(getTotalPrice)
+  const totalPrice = useSelector(getTotalPrice);
   const dispatch = useDispatch();
   const paymentData = useSelector((state) => state.multistep.paymentData);
-  const [loading, setLoading] = useState(false);
+  const loading = useSelector((state) => state.multistep.loading);
   const [alert, showAlert] = useState(false);
 
   const handlePaymentType = (e) => {
     dispatch(
       setPaymentData({
-        paymentMethod: e.target.value
+        paymentMethod: e.target.value,
       })
-    )
+    );
   };
   const prevHandler = () => {
     dispatch(setStep(2));
@@ -29,7 +34,7 @@ const Step3 = () => {
     if (paymentData.paymentMethod === "COD") {
       sendCODPaymentToServer();
     } else if (paymentData.paymentMethod === "Credit Card") {
-      showAlert(true);
+      CardTransactionHandler();
     } else {
       showAlert(true);
     }
@@ -41,39 +46,57 @@ const Step3 = () => {
   }));
 
   const sendCODPaymentToServer = async () => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("cust_name", paymentData.name);
-    formData.append("cust_email", paymentData.email);
-    formData.append("cust_phone", paymentData.phone);
-    formData.append("cust_address", paymentData.address);
-    formData.append('price', totalPrice);
-    formData.append("payment_method", paymentData.paymentMethod);
-    formData.append("purchased_items", JSON.stringify(purchasedItems));
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}payments/cod-payment`,
-        {
-          method: "POST",
-          body: formData,
+      const formData = new FormData();
+      formData.append("cust_name", paymentData.name);
+      formData.append("cust_email", paymentData.email);
+      formData.append("cust_phone", paymentData.phone);
+      formData.append("cust_address", paymentData.address);
+      formData.append("price", totalPrice);
+      formData.append("payment_method", paymentData.paymentMethod);
+      formData.append("purchased_items", JSON.stringify(purchasedItems));
+      const resultAction = await dispatch(submitCODPayment(formData));
+      if (submitCODPayment.fulfilled.match(resultAction)) {
+        const responseData = resultAction.payload;
+        if (responseData.ok) {
+          dispatch(clearCart());
+          dispatch(setStep(4));
+          dispatch(setSuccess(true));
+        } else {
+          dispatch(setStep(4));
+          dispatch(setSuccess(false));
         }
-      );
-
-      if (response.ok) {
-        console.log("Payment successful");
-        dispatch(clearCart())
-      } else {
-        console.error(
-          "Server returned error:"
-        );
       }
     } catch (error) {
       console.error("Error sending payment:", error);
     }
+  };
 
-    setTimeout(() => {
-      setLoading(false);
-    }, 1500);
+  const CardTransactionHandler = async () => {
+    try {
+      const formData = new formData();
+      formData.append("cust_name", paymentData.name);
+      formData.append("cust_email", paymentData.email);
+      formData.append("cust_phone", paymentData.phone);
+      formData.append("cust_address", paymentData.address);
+      formData.append("price", totalPrice);
+      formData.append("payment_method", paymentData.paymentMethod);
+      formData.append("purchased_items", JSON.stringify(purchasedItems));
+      const resultAction = await dispatch(CredictCardTransaction(formData));
+      if (CredictCardTransaction.fulfilled.match(resultAction)) {
+        const responseData = resultAction.payload;
+        if (responseData.ok) {
+          dispatch(clearCart());
+          dispatch(setStep(4));
+          dispatch(setSuccess(true));
+        } else {
+          dispatch(setStep(4));
+          dispatch(setSuccess(false));
+        }
+      }
+    } catch (error) {
+      console.log("Error in sending Payment", error);
+    }
   };
 
   return (
@@ -109,7 +132,9 @@ const Step3 = () => {
                   Card Holder Name
                 </label>
                 <input
-                
+                  onChange={(e) =>
+                    dispatch(setPaymentData({ cardHolerName: e.target.value }))
+                  }
                   className="input-text"
                   type="text"
                   placeholder="Name on Card"
@@ -121,6 +146,9 @@ const Step3 = () => {
                     CVV
                   </label>
                   <ReactInputMask
+                    onChange={(e) =>
+                      dispatch(setPaymentData({ cvv: e.target.value }))
+                    }
                     mask={`9999`}
                     maskChar="_"
                     className="input-text"
@@ -133,6 +161,9 @@ const Step3 = () => {
                     Exp Date
                   </label>
                   <ReactInputMask
+                    onChange={(e) =>
+                      dispatch(setPaymentData({ expDate: e.target.value }))
+                    }
                     mask="99-99"
                     maskChar="_"
                     className="input-text"
@@ -148,6 +179,9 @@ const Step3 = () => {
                   Exp Date
                 </label>
                 <ReactInputMask
+                  onChange={(e) =>
+                    dispatch(setPaymentData({ expDate: e.target.value }))
+                  }
                   mask="99-99"
                   maskChar="_"
                   className="input-text"
@@ -160,6 +194,7 @@ const Step3 = () => {
                   Card Number
                 </label>
                 <ReactInputMask
+                onChange={(e) => dispatch(setPaymentData({cardNumber: e.target.value}))}
                   mask="9999 9999 9999 9999"
                   maskChar="_"
                   className="input-text"

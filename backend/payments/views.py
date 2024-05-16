@@ -11,13 +11,26 @@ import json
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 @api_view(['POST'])
-def checkout(request):
-    amount = 1000
-    currency = 'usd'
+def CardTransaction(request):
+    if request.method == 'POST':
+        purchased_items_str = request.data.get('purchased_items')
+        purchased_items = json.loads(purchased_items_str)
+        for items in purchased_items:
+            product = Product.objects.get(id=items['id'])
+            product.stock_quantity -= items['quantity']
+            product.save()
+        serializer = PaymentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Payment processed successfully.'})
+        else:
+            return Response(serializer.errors, status=400)
+        
     try:
+        amount = request.data.get('price')
         intent = stripe.PaymentIntent.create(
             amount=amount,
-            currency=currency
+            currency='pkr'
         )
         client_secret = intent.client_secret
         return Response({'client_secret': client_secret})
